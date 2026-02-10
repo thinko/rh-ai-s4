@@ -70,7 +70,7 @@ const Login: React.FC = () => {
   const loginForm = (
     <LoginForm
       showHelperText={!!authError}
-      helperText={authError || undefined}
+      helperText={authError ? t(`errors.${authError}`) : undefined}
       helperTextIcon={undefined}
       usernameLabel={t('form.username')}
       usernameValue={username}
