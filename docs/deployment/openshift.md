@@ -173,7 +173,9 @@ oc get all -l app=s4
 
 ### Routes (External Access)
 
-Routes provide external HTTPS access with automatic TLS termination:
+Routes provide external HTTPS access with automatic TLS termination. By default, only the **Web UI** (port 5000) is exposed via Route. The **S3 API** (port 7480) can optionally be exposed via a separate Route.
+
+#### Web UI Route
 
 ```yaml
 # route.yaml
@@ -213,7 +215,7 @@ oc get route s4 -o jsonpath='{.spec.host}'
 open https://$(oc get route s4 -o jsonpath='{.spec.host}')
 ```
 
-### Custom Route Hostname
+#### Custom Route Hostname
 
 ```bash
 # Create Route with custom hostname
@@ -222,6 +224,38 @@ oc create route edge s4 \
   --hostname=s4.apps.your-cluster.com \
   --port=5000
 ```
+
+#### S3 API Route (Optional)
+
+To expose the S3 API externally for use with `aws s3`, `mc`, or other S3 clients, create a separate Route:
+
+With Helm:
+
+```bash
+helm install s4 ./charts/s4 --namespace s4 --create-namespace \
+  --set auth.username=admin \
+  --set auth.password=your-secure-password \
+  --set route.enabled=true \
+  --set route.s3Api.enabled=true \
+  --set route.s3Api.host=s3.s4.apps.your-cluster.com
+```
+
+With raw manifests:
+
+```bash
+oc apply -f kubernetes/s4-route-s3.yaml
+```
+
+Or create manually:
+
+```bash
+oc create route edge s4-api \
+  --service=s4 \
+  --hostname=s3.s4.apps.your-cluster.com \
+  --port=7480
+```
+
+> **Warning:** Exposing the S3 API externally has security implications. Ensure proper authentication and network policies are in place.
 
 ### Security Context Constraints (SCC)
 
@@ -651,24 +685,27 @@ oc get storageclass
 - ✅ Configure network policies
 - ✅ Regular security scans
 
-### Multi-Zone Deployment
+### High Availability Considerations
 
-For high availability:
+S4 is designed for **single-replica deployment** due to its SQLite backend and in-memory state (see [Kubernetes Deployment Architecture](./kubernetes.md#deployment-architecture)). Multi-replica scaling is not supported.
+
+To maximize uptime within this constraint:
+
+- **PodDisruptionBudget**: Prevent voluntary evictions during maintenance
+- **Liveness/Readiness probes**: Enable automatic restart on failure
+- **Reliable storage**: Use a production-grade StorageClass (ODF, EBS, etc.)
+- **Resource requests/limits**: Prevent OOM kills and ensure scheduling
 
 ```yaml
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: s4
 spec:
-  replicas: 3
-  template:
-    spec:
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-            - weight: 100
-              podAffinityTerm:
-                labelSelector:
-                  matchLabels:
-                    app: s4
-                topologyKey: topology.kubernetes.io/zone
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: s4
 ```
 
 ## Related Documentation
