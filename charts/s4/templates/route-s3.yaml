@@ -2,7 +2,7 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: {{ include "s4.fullname" . }}-s3
+  name: {{ include "s4.fullname" . }}-api
   labels:
     {{- include "s4.labels" . | nindent 4 }}
   {{- with .Values.route.s3Api.annotations }}

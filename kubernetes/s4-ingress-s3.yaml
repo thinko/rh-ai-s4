@@ -5,7 +5,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: s4-s3
+  name: s4-api
   labels:
     app: s4
     app.kubernetes.io/name: s4
@@ -24,6 +24,6 @@ spec:
                   number: 7480
   # Uncomment and configure TLS if needed
   # tls:
-  #   - secretName: s4-s3-tls
+  #   - secretName: s4-api-tls
   #     hosts:
   #       - s3.s4.example.com

@@ -249,7 +249,7 @@ oc apply -f kubernetes/s4-route-s3.yaml
 Or create manually:
 
 ```bash
-oc create route edge s4-s3 \
+oc create route edge s4-api \
   --service=s4 \
   --hostname=s3.s4.apps.your-cluster.com \
   --port=7480

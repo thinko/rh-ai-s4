@@ -415,7 +415,7 @@ ingress:
   #         - path: /
   #           pathType: Prefix
   #   tls:
-  #     - secretName: s4-s3-tls
+  #     - secretName: s4-api-tls
   #       hosts:
   #         - s3.s4.example.com
 ```

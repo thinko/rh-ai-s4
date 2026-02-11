@@ -5,7 +5,7 @@
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: s4-s3
+  name: s4-api
   labels:
     app: s4
     app.kubernetes.io/name: s4
