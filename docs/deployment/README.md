@@ -145,13 +145,15 @@ S4 requires two persistent volumes:
 
 **Kubernetes**:
 
-- Service exposes ports
-- Use Ingress for external HTTPS access
+- Service exposes both ports internally
+- Use Ingress for external Web UI access (port 5000)
+- Optionally enable a separate S3 API Ingress for external S3 access (port 7480)
 
 **OpenShift**:
 
-- Service exposes ports
-- Use Route for external HTTPS access
+- Service exposes both ports internally
+- Use Route for external Web UI access (port 5000)
+- Optionally enable a separate S3 API Route for external S3 access (port 7480)
 
 ## Authentication
 

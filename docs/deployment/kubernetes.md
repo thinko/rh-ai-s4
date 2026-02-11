@@ -12,7 +12,8 @@ S4 can be deployed to Kubernetes using **Helm charts** (recommended) or raw mani
 - PersistentVolumeClaims for data storage
 - ConfigMap for configuration
 - Secret for credentials
-- Optional Ingress for external HTTPS access
+- Optional Ingress for external HTTPS access (Web UI)
+- Optional Ingress for external S3 API access
 - Optional OpenShift Route for OpenShift deployments
 
 ## Deployment Methods
@@ -145,7 +146,7 @@ helm install s4 ./charts/s4 --namespace s4 --create-namespace \
   --set auth.enabled=false
 ```
 
-#### With Ingress
+#### With Ingress (Web UI)
 
 ```bash
 helm install s4 ./charts/s4 --namespace s4 --create-namespace \
@@ -156,6 +157,26 @@ helm install s4 ./charts/s4 --namespace s4 --create-namespace \
   --set "ingress.hosts[0].paths[0].path=/" \
   --set "ingress.hosts[0].paths[0].pathType=Prefix"
 ```
+
+#### With Ingress (Web UI + S3 API)
+
+To also expose the S3 API externally for use with `aws s3`, `mc`, or other S3 clients:
+
+```bash
+helm install s4 ./charts/s4 --namespace s4 --create-namespace \
+  --set auth.username=admin \
+  --set auth.password=your-secure-password \
+  --set ingress.enabled=true \
+  --set "ingress.hosts[0].host=s4.example.com" \
+  --set "ingress.hosts[0].paths[0].path=/" \
+  --set "ingress.hosts[0].paths[0].pathType=Prefix" \
+  --set ingress.s3Api.enabled=true \
+  --set "ingress.s3Api.hosts[0].host=s3.s4.example.com" \
+  --set "ingress.s3Api.hosts[0].paths[0].path=/" \
+  --set "ingress.s3Api.hosts[0].paths[0].pathType=Prefix"
+```
+
+> **Warning:** Exposing the S3 API externally has security implications. Ensure proper authentication and network policies are in place.
 
 #### With OpenShift Route
 
@@ -209,8 +230,10 @@ Key configuration groups:
 | `storage.*`   | PVC sizes and storage classes |
 | `resources.*` | CPU and memory limits         |
 | `service.*`   | Service type and ports        |
-| `ingress.*`   | Ingress configuration         |
-| `route.*`     | OpenShift Route configuration |
+| `ingress.*`   | Web UI Ingress configuration         |
+| `ingress.s3Api.*` | S3 API Ingress configuration (optional) |
+| `route.*`     | Web UI OpenShift Route configuration |
+| `route.s3Api.*` | S3 API OpenShift Route configuration (optional) |
 
 ### Upgrading with Helm
 
@@ -281,7 +304,10 @@ kubernetes/
 ├── s4-configmap.yaml     # Configuration (regions, ports)
 ├── s4-pvc.yaml           # Persistent Volume Claims
 ├── s4-deployment.yaml    # Deployment specification
-└── s4-service.yaml       # Service definitions
+├── s4-service.yaml       # Service definitions
+├── s4-route.yaml         # OpenShift Route for Web UI (optional)
+├── s4-route-s3.yaml      # OpenShift Route for S3 API (optional)
+└── s4-ingress-s3.yaml    # Kubernetes Ingress for S3 API (optional)
 ```
 
 ### Step-by-Step Deployment
@@ -457,6 +483,10 @@ kubectl get svc s4-nodeport
 
 ### Ingress (Production)
 
+By default, Ingress exposes only the **Web UI** (port 5000). The **S3 API** (port 7480) remains cluster-internal unless explicitly enabled.
+
+#### Web UI Ingress
+
 With Helm:
 
 ```bash
@@ -500,6 +530,34 @@ spec:
                 port:
                   number: 5000
 ```
+
+#### S3 API Ingress (Optional)
+
+To also expose the S3 API externally, enable a separate Ingress with its own hostname:
+
+With Helm:
+
+```bash
+helm install s4 ./charts/s4 -n s4 --create-namespace \
+  --set auth.username=admin \
+  --set auth.password=your-secure-password \
+  --set ingress.enabled=true \
+  --set "ingress.hosts[0].host=s4.example.com" \
+  --set "ingress.hosts[0].paths[0].path=/" \
+  --set "ingress.hosts[0].paths[0].pathType=Prefix" \
+  --set ingress.s3Api.enabled=true \
+  --set "ingress.s3Api.hosts[0].host=s3.s4.example.com" \
+  --set "ingress.s3Api.hosts[0].paths[0].path=/" \
+  --set "ingress.s3Api.hosts[0].paths[0].pathType=Prefix"
+```
+
+With raw manifests, apply the provided S3 API Ingress:
+
+```bash
+kubectl apply -f kubernetes/s4-ingress-s3.yaml
+```
+
+> **Warning:** Exposing the S3 API externally has security implications. Ensure proper network policies are in place.
 
 ---
 

@@ -335,6 +335,7 @@ Before deploying to production, ensure:
 - [ ] **Strong credentials** - Random, complex passwords (16+ characters)
 - [ ] **JWT secret configured** - Shared secret for multi-replica (32+ characters)
 - [ ] **HTTPS enabled** - TLS termination at ingress/load balancer
+- [ ] **S3 API access reviewed** - If exposed externally (`route.s3Api.enabled` or `ingress.s3Api.enabled`), ensure network policies restrict access
 - [ ] **Secrets management** - Vault/External Secrets (or Kubernetes Secrets at minimum)
 - [ ] **Monitoring configured** - APM, logging, alerting
 - [ ] **Resource limits set** - CPU, memory limits defined
@@ -387,6 +388,10 @@ route:
   enabled: true
   tls:
     termination: edge
+  # Uncomment to expose S3 API externally (WARNING: security implications)
+  # s3Api:
+  #   enabled: true
+  #   host: s3.s4.apps.example.com
 
 # For Kubernetes
 ingress:
@@ -401,6 +406,18 @@ ingress:
     - secretName: s4-tls
       hosts:
         - s4.example.com
+  # Uncomment to expose S3 API externally (WARNING: security implications)
+  # s3Api:
+  #   enabled: true
+  #   hosts:
+  #     - host: s3.s4.example.com
+  #       paths:
+  #         - path: /
+  #           pathType: Prefix
+  #   tls:
+  #     - secretName: s4-s3-tls
+  #       hosts:
+  #         - s3.s4.example.com
 ```
 
 ```bash

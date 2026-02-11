@@ -193,7 +193,10 @@ s4/
     ├── s4-deployment.yaml
     ├── s4-service.yaml
     ├── s4-pvc.yaml
-    └── s4-secret.yaml
+    ├── s4-secret.yaml
+    ├── s4-route.yaml          # OpenShift Route for Web UI (optional)
+    ├── s4-route-s3.yaml       # OpenShift Route for S3 API (optional)
+    └── s4-ingress-s3.yaml     # Kubernetes Ingress for S3 API (optional)
 ```
 
 ## Technology Stack
