@@ -51,7 +51,7 @@ See [Frontend Architecture](frontend.md) for details.
 
 ### 2. API Server (Port 5000)
 
-**Technology**: Fastify 4 + Node.js 18+ + TypeScript
+**Technology**: Fastify 5 + Node.js 20+ + TypeScript
 
 **Responsibilities**:
 
@@ -203,8 +203,8 @@ s4/
 
 ### Backend
 
-- **Runtime**: Node.js 18+
-- **Framework**: Fastify 4
+- **Runtime**: Node.js 20+
+- **Framework**: Fastify 5
 - **Language**: TypeScript
 - **S3 Client**: AWS SDK v3
 - **Authentication**: JWT (jsonwebtoken)
